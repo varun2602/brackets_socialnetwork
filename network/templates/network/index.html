@@ -1,0 +1,180 @@
+{% extends "network/layout.html" %}
+{% block title %} 
+Index
+{% endblock %} 
+{% block header %} 
+<style>
+  .post_div 
+  {
+     border: 1px solid black;
+     margin: 5px;
+     padding: 10px
+  }
+  .user 
+  {
+    color:blue
+    
+  }
+  .edit-post-textarea{
+    width:100%;
+    border: 2px solid black;
+    margin: 0px 20px 3px 5px;
+    
+    align-items: center;
+    
+  }
+</style>
+<script>
+  function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+  document.addEventListener('DOMContentLoaded', function(){
+    // document.getElementsByClassName('edit-post-textarea').style.display = 'none'
+   let textareas = document.querySelectorAll('.edit-post-textarea')
+   for(const textarea of textareas){
+    textarea.style.display = 'none'
+    textarea.style.font = "inherit"
+   }
+   let label = document.querySelectorAll('.label')
+   for(const l of label){
+    l.style.display = 'none'
+   }
+   let submit_buttons = document.querySelectorAll(".btn.btn-success")
+   for(const submit of submit_buttons){
+    submit.style.display = "none"
+   }
+  //  When user wants to edit the post 
+   const buttons = document.getElementsByClassName("btn btn-primary");
+    for (const button of buttons) {
+      button.addEventListener('click', function(){
+        // let id = this.id
+        let parentDiv = this.parentElement.parentElement;
+        let id = parentDiv.querySelector('.content').id;
+        let content_text = parentDiv.querySelector('.content')
+        let textarea = parentDiv.querySelector('.edit-post-textarea')
+        let button_posts = document.querySelectorAll('.btn.btn-primary')
+        let submit_button = parentDiv.querySelector('.btn.btn-success')
+        submit_button.style.display = "block"
+        // Sensing whether textarea has text If it has no text, then submit button will be disabled
+        textarea.addEventListener('input', function(){
+          if(textarea.value == ""){
+            submit_button.disabled = true
+          }
+          else{
+            submit_button.disabled = false
+          }
+        })
+        
+        
+        for(const button_post of button_posts){
+        button_post.style.display = 'none'
+        }
+        content_text.style.display = "none"
+        textarea.style.display = "block"
+        
+        // When submit button is clicked
+        submit_button.addEventListener('click', function(){
+          console.log(`${textarea.value}`)
+          // let parentel = this.parentElement.parentElement
+          let post_id = this.id
+          console.log(`${post_id}`)
+          fetch(`edit_post/${post_id}`, {
+            method:'POST',
+            headers:{
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({content1:textarea.value})
+          })
+          .then(response => response.json())
+          .then(data => {
+            parentDiv.querySelector('.content').innerHTML = data.content;
+            parentDiv.querySelector('.content').style.display = 'block';
+            submit_button.style.display = "none";
+            for(const button_post of button_posts){
+              button_post.style.display = 'block';
+            }
+            parentDiv.querySelector('.edit-post-textarea').style.display = 'none'
+            parentDiv.querySelector('.label').style.display = 'none'
+
+          });
+
+
+        })
+      })
+    }
+      });
+    // let textarea_id = parent.querySelector('.edit-post-textarea').id
+    // let textarea_area = parent.querySelector('#textarea_id')
+    // console.log(`${textarea_area}`)
+ 
+</script>
+{% endblock %}
+
+{% block body %}
+    <div id="post_page">
+    {% if user.is_authenticated %} 
+    <div class="pagination">
+      <span class="step-links">
+          {% if page_obj.has_previous %}
+              <a href="?page=1">&laquo; first</a>
+              <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+          {% endif %}
+  
+          <span class="current">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+          </span>
+  
+          {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}">next</a>
+              <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+          {% endif %}
+      </span>
+  </div>
+    <br>
+      {% for a in page_obj  %}  
+        
+        <div class = "post_div" >
+          <br>
+          {% if user.username == a.creator.username %}
+          <div>
+            <!-- <button type="button" class="btn btn-primary" id = "{{a.creator.username}}">Edit Post</button> -->
+            <button type="button" class="btn btn-primary" >Edit Post</button>
+          </div> <br>
+          {% endif %}
+            
+            <!-- <h3 class = "id_fetch">{{a.id}}</h3> -->
+            <div class = "user"><a href="{% url 'profile_page' a.creator.username %}"><h5>{{a.creator.username}}</h5></a></div>
+            <div class = "timestamp"><h6>{{a.timestamp}}</h6></div>
+            <h4><div class = "content" id = "{{a.creator.username}} {{a.timestamp}}">{{a.content}}</div></h4>
+            <label class = "label" for="textarea"><h4>Edit Post</h4></label>
+            <textarea class="edit-post-textarea" id = "{{a.timestamp}} {{a.creator.username}}">{{a.content}}</textarea>
+            <button type="button" class="btn btn-success" id = "{{a.id}}">submit</button>
+            <!-- <button type="button" class="btn btn-success btn-sm">
+              <i class="fa fa-thumbs-up">Like</i>
+            </button> -->
+        </div>
+         <br>
+       {% endfor %}
+       </div>
+       <!-- <div id = "edit_page">
+        <h1>EDIT</h1>
+        <textarea id="edit-post-textarea"></textarea>
+       </div> -->
+    
+    {% endif %}
+
+{% endblock %}

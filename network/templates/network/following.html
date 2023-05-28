@@ -1,0 +1,20 @@
+{% extends "network/layout.html" %} 
+{% block title %} 
+Following
+{% endblock %} 
+{% block header %} 
+<style>
+    .following
+    {
+        color:blue
+    }
+</style>
+{% endblock %}
+{% block body %} 
+<div>
+    <h1>Following</h1>
+    {% for f in following_objects %} 
+     <div class = "following"><a href="{% url 'profile_page' f.user_being_followed.username %}"><h4>{{f.user_being_followed.username}}</h4></a></div>
+    {% endfor %}
+</div>
+{% endblock %}

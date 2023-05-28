@@ -1,0 +1,35 @@
+{% extends "network/layout.html" %} 
+{% block title %} 
+Following
+{% endblock %} 
+{% block header %} 
+<style>
+    .user
+    {
+        color:blue
+    }
+    .post_div_follow 
+    {
+        border: 1px solid black
+    }
+</style>
+{% endblock %}
+{% block body %} 
+{% if user.is_authenticated %}
+    <h1>Posts of people you follow</h1> 
+    {% for posts in posts %} 
+        {% for p in posts %} 
+        <div class = "post_div_follow">
+            <br>
+            <div>
+              <a href=""><button type="button" class="btn btn-primary">Edit Post</button></a>
+            </div> <br>
+              <div class = "user"><a href="{% url 'profile_page' p.creator.username %}"><h5>{{p.creator.username}}</h5></a></div>
+              <div class = "timestamp"><h6>{{p.timestamp}}</h6></div>
+              <div class = "content"><h4>{{p.content}}</h4></div>
+        </div>
+           <br>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+{% endblock %}
